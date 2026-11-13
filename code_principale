@@ -1,0 +1,53 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+//DESCRIPTION
+//lire_fichier : lit le fichier PPM (P3) "nom" et renvoie un struct image
+//               (largeur, hauteur, max, pixels).
+//ecrire_fichier : prend un struct image et un nom de fichier, et écrit
+//                 l'image au format PPM (P3).
+
+struct image {
+    int L;
+    int H;
+    int max;
+    int *pixels;
+};
+
+struct image lire_fichier(char *nom) {
+    struct image I;
+    char c;
+    FILE *F;
+    F = fopen(nom, "r");
+    if (F == NULL) { perror(nom); exit(1); }
+    c = fgetc(F);
+    if (c != 'P') exit(2);
+    c = fgetc(F);
+    if (c != '3') exit(3);
+    fscanf(F, "%d", &I.L);
+    fscanf(F, "%d", &I.H);
+    fscanf(F, "%d", &I.max);
+    I.pixels = malloc(3 * I.L * I.H * sizeof(int));
+    if (I.pixels == NULL) exit(4);
+    for (int i = 0; i < 3 * I.L * I.H; i++)
+        fscanf(F, "%d", &I.pixels[i]);
+    fclose(F);
+    return I;
+}
+
+void ecrire_fichier(struct image I, char *nom) {
+    FILE *F;
+    F = fopen(nom, "w");
+    if (F == NULL) { perror(nom); exit(1); }
+    fprintf(F, "P3\n%d %d\n%d\n", I.L, I.H, I.max);
+    for (int i = 0; i < 3 * I.L * I.H; i++)
+        fprintf(F, "%d\n", I.pixels[i]);
+    fclose(F);
+}
+
+int main(int argc, char *argv[]) {
+    struct image I;
+    I = lire_fichier("BASES/bateau.ppm");
+    ecrire_fichier(I, "bateau2.ppm");
+    exit(0);
+}
